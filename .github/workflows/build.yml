@@ -37,14 +37,11 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: egor-tensin/setup-mingw@v2
-        with:
-          platform: x64
       - name: restore
         run: |
           C:\vcpkg\bootstrap-vcpkg.bat
-          C:\vcpkg\vcpkg install gtest:x64-windows
+          C:\vcpkg\vcpkg install gtest:x64-mingw-dynamic
       - name: build
-        run: .build\build-mingw.ps1 -GTestPath C:\vcpkg\installed\x64-windows
+        run: .build\build-mingw.ps1 -GTestPath C:\vcpkg\installed\x64-mingw-dynamic
       - name: unittest
         run: .build\run-unittest.ps1
