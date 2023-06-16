@@ -28,7 +28,7 @@ cd build
 
 cmake -DCMAKE_PREFIX_PATH="$GTestPath" -DSTRING_ENCODING_TYPE=NONE -G "MinGW Makefiles" ..
 cmake --build . --config Debug
-cp $GTestPath\debug\bin\*.dll tests\Debug
-cp Debug\kaitai_struct_cpp_stl_runtime.dll tests\Debug
+
+Get-ChildItem -Recurse
 
 Pop-Location
