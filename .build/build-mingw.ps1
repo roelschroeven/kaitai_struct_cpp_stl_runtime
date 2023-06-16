@@ -1,10 +1,10 @@
 <#
 .DESCRIPTION
-Builds Kaitai Struct C++ runtime library and unit tests
+Builds Kaitai Struct C++ runtime library and unit tests on Windows using Mingw
 
 Requires:
-- MSVC native tools installed and available in the command prompt
-- cmake/ctest available (normally installed with MSVC native tools)
+- Mingw installed and available in the command prompt
+- cmake/ctest available
 - GTest installed, path passed in `-GTestPath`
 #>
 
@@ -26,7 +26,7 @@ Push-Location $repoRoot
 $null = New-Item build -ItemType Directory -Force
 cd build
 
-cmake -DCMAKE_PREFIX_PATH="$GTestPath" -DSTRING_ENCODING_TYPE=NONE ..
+cmake -DCMAKE_PREFIX_PATH="$GTestPath" -DSTRING_ENCODING_TYPE=NONE -G "MinGW Makefiles" ..
 cmake --build . --config Debug
 cp $GTestPath\debug\bin\*.dll tests\Debug
 cp Debug\kaitai_struct_cpp_stl_runtime.dll tests\Debug
