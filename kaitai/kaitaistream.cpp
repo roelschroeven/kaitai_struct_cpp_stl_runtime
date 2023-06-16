@@ -9,7 +9,7 @@
 #define __BYTE_ORDER    BYTE_ORDER
 #define __BIG_ENDIAN    BIG_ENDIAN
 #define __LITTLE_ENDIAN LITTLE_ENDIAN
-#elif defined(_MSC_VER) // !__APPLE__
+#elif defined(_MSC_VER) || defined(MINGW32)
 #include <stdlib.h>
 #define __LITTLE_ENDIAN     1234
 #define __BIG_ENDIAN        4321
@@ -17,7 +17,7 @@
 #define bswap_16(x) _byteswap_ushort(x)
 #define bswap_32(x) _byteswap_ulong(x)
 #define bswap_64(x) _byteswap_uint64(x)
-#elif defined(__QNX__) // __QNX__
+#elif defined(__QNX__)
 #include <sys/param.h>
 #include <gulliver.h>
 #define bswap_16(x) ENDIAN_RET16(x)
@@ -26,7 +26,7 @@
 #define __BYTE_ORDER    BYTE_ORDER
 #define __BIG_ENDIAN    BIG_ENDIAN
 #define __LITTLE_ENDIAN LITTLE_ENDIAN
-#else // !__APPLE__ or !_MSC_VER or !__QNX__
+#else // !__APPLE__ or !_MSC_VER or !MINGW32 or !__QNX__
 #include <endian.h>
 #include <byteswap.h>
 #endif
