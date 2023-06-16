@@ -692,6 +692,10 @@ std::string kaitai::kstream::bytes_to_str(std::string src, std::string src_enc) 
 }
 #elif defined(KS_STR_ENCODING_NONE)
 std::string kaitai::kstream::bytes_to_str(std::string src, std::string src_enc) {
+    // Silence the compiler warning about src_enc being unused - https://stackoverflow.com/a/1486931
+    // Sure, it's being unused in this version of this function, but it is obviously used in other implementations
+    (void) src_enc;
+
     return src;
 }
 #else
