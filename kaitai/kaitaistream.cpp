@@ -9,7 +9,7 @@
 #define __BYTE_ORDER    BYTE_ORDER
 #define __BIG_ENDIAN    BIG_ENDIAN
 #define __LITTLE_ENDIAN LITTLE_ENDIAN
-#elif defined(_MSC_VER) || defined(MINGW32)
+#elif defined(_MSC_VER) || defined(__MINGW32__)
 #include <stdlib.h>
 #define __LITTLE_ENDIAN     1234
 #define __BIG_ENDIAN        4321
@@ -26,7 +26,7 @@
 #define __BYTE_ORDER    BYTE_ORDER
 #define __BIG_ENDIAN    BIG_ENDIAN
 #define __LITTLE_ENDIAN LITTLE_ENDIAN
-#else // !__APPLE__ or !_MSC_VER or !MINGW32 or !__QNX__
+#else // !__APPLE__ or !_MSC_VER or !__MINGW32__ or !__QNX__
 #include <endian.h>
 #include <byteswap.h>
 #endif
