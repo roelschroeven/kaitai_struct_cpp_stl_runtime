@@ -4,5 +4,6 @@ C++Builder_Berlin/Lib
 twfiles.@@@
 *.cbproj.local
 *.dsk
+*.res
 *.twfd
 *.twopts
