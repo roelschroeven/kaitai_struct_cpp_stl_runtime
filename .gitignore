@@ -1,1 +1,8 @@
 /build/
+C++Builder_Berlin/Win32
+C++Builder_Berlin/Lib
+twfiles.@@@
+*.cbproj.local
+*.dsk
+*.twfd
+*.twopts
