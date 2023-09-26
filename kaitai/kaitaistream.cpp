@@ -1,40 +1,58 @@
 #include <kaitai/kaitaistream.h>
 #include <kaitai/exceptions.h>
 
-#if defined(__APPLE__)
-#include <machine/endian.h>
-#include <libkern/OSByteOrder.h>
-#define bswap_16(x) OSSwapInt16(x)
-#define bswap_32(x) OSSwapInt32(x)
-#define bswap_64(x) OSSwapInt64(x)
-#define __BYTE_ORDER    BYTE_ORDER
-#define __BIG_ENDIAN    BIG_ENDIAN
-#define __LITTLE_ENDIAN LITTLE_ENDIAN
-#elif defined(_MSC_VER) // !__APPLE__
-#include <stdlib.h>
-#define __LITTLE_ENDIAN     1234
-#define __BIG_ENDIAN        4321
-#define __BYTE_ORDER        __LITTLE_ENDIAN
-#define bswap_16(x) _byteswap_ushort(x)
-#define bswap_32(x) _byteswap_ulong(x)
-#define bswap_64(x) _byteswap_uint64(x)
-#elif defined(__QNX__) // __QNX__
-#include <sys/param.h>
-#include <gulliver.h>
-#define bswap_16(x) ENDIAN_RET16(x)
-#define bswap_32(x) ENDIAN_RET32(x)
-#define bswap_64(x) ENDIAN_RET64(x)
-#define __BYTE_ORDER    BYTE_ORDER
-#define __BIG_ENDIAN    BIG_ENDIAN
-#define __LITTLE_ENDIAN LITTLE_ENDIAN
-#else // !__APPLE__ or !_MSC_VER or !__QNX__
-#include <endian.h>
-#include <byteswap.h>
-#endif
-
 #include <iostream>
 #include <vector>
 #include <stdexcept>
+
+// ========================================================================
+// Integer from raw data with correct endianness
+// ========================================================================
+
+uint16_t le_to_host_16(const void *data)
+{
+  const unsigned char *p = reinterpret_cast<const unsigned char*>(data);
+  return (uint16_t(p[1]) << 8) | p[0];
+}
+
+uint32_t le_to_host_32(const void *data)
+{
+  const unsigned char *p = reinterpret_cast<const unsigned char*>(data);
+  return (uint32_t(p[3]) << 24) | (uint32_t(p[2]) << 16) | (uint32_t(p[1]) << 8) | p[0];
+}
+
+uint64_t le_to_host_64(const void *data)
+{
+  const unsigned char *p = reinterpret_cast<const unsigned char*>(data);
+  return
+    (uint64_t(p[7]) << 56) | (uint64_t(p[6]) << 48) | (uint64_t(p[5]) << 40) | (uint64_t(p[4]) << 32) |
+    (uint64_t(p[3]) << 24) | (uint64_t(p[2]) << 16) | (uint64_t(p[1]) << 8)  | p[0];
+}
+
+
+uint16_t be_to_host_16(const void *data)
+{
+  const unsigned char *p = reinterpret_cast<const unsigned char*>(data);
+  return (uint16_t(p[0]) << 8) | p[1];
+}
+
+uint32_t be_to_host_32(const void *data)
+{
+  const unsigned char *p = reinterpret_cast<const unsigned char*>(data);
+  return (uint32_t(p[0]) << 24) | (uint32_t(p[1]) << 16) | (uint32_t(p[2]) << 8) | p[3];
+}
+
+uint64_t be_to_host_64(const void *data)
+{
+  const unsigned char *p = reinterpret_cast<const unsigned char*>(data);
+  return
+    (uint64_t(p[0]) << 56) | (uint64_t(p[1]) << 48) | (uint64_t(p[2]) << 40) | (uint64_t(p[3]) << 32) |
+    (uint64_t(p[4]) << 24) | (uint64_t(p[5]) << 16) | (uint64_t(p[6]) << 8)  | p[7];
+}
+
+// ========================================================================
+//
+// ========================================================================
 
 kaitai::kstream::kstream(std::istream *io) {
     m_io = io;
@@ -122,27 +140,21 @@ int8_t kaitai::kstream::read_s1() {
 int16_t kaitai::kstream::read_s2be() {
     int16_t t;
     m_io->read(reinterpret_cast<char *>(&t), 2);
-#if __BYTE_ORDER == __LITTLE_ENDIAN
-    t = bswap_16(t);
-#endif
+    t = be_to_host_16(&t);
     return t;
 }
 
 int32_t kaitai::kstream::read_s4be() {
     int32_t t;
     m_io->read(reinterpret_cast<char *>(&t), 4);
-#if __BYTE_ORDER == __LITTLE_ENDIAN
-    t = bswap_32(t);
-#endif
+    t = be_to_host_32(&t);
     return t;
 }
 
 int64_t kaitai::kstream::read_s8be() {
     int64_t t;
     m_io->read(reinterpret_cast<char *>(&t), 8);
-#if __BYTE_ORDER == __LITTLE_ENDIAN
-    t = bswap_64(t);
-#endif
+    t = be_to_host_64(&t);
     return t;
 }
 
@@ -153,27 +165,21 @@ int64_t kaitai::kstream::read_s8be() {
 int16_t kaitai::kstream::read_s2le() {
     int16_t t;
     m_io->read(reinterpret_cast<char *>(&t), 2);
-#if __BYTE_ORDER == __BIG_ENDIAN
-    t = bswap_16(t);
-#endif
+    t = le_to_host_16(&t);
     return t;
 }
 
 int32_t kaitai::kstream::read_s4le() {
     int32_t t;
     m_io->read(reinterpret_cast<char *>(&t), 4);
-#if __BYTE_ORDER == __BIG_ENDIAN
-    t = bswap_32(t);
-#endif
+    t = le_to_host_32(&t);
     return t;
 }
 
 int64_t kaitai::kstream::read_s8le() {
     int64_t t;
     m_io->read(reinterpret_cast<char *>(&t), 8);
-#if __BYTE_ORDER == __BIG_ENDIAN
-    t = bswap_64(t);
-#endif
+    t = le_to_host_64(&t);
     return t;
 }
 
@@ -194,27 +200,21 @@ uint8_t kaitai::kstream::read_u1() {
 uint16_t kaitai::kstream::read_u2be() {
     uint16_t t;
     m_io->read(reinterpret_cast<char *>(&t), 2);
-#if __BYTE_ORDER == __LITTLE_ENDIAN
-    t = bswap_16(t);
-#endif
+    t = be_to_host_16(&t);
     return t;
 }
 
 uint32_t kaitai::kstream::read_u4be() {
     uint32_t t;
     m_io->read(reinterpret_cast<char *>(&t), 4);
-#if __BYTE_ORDER == __LITTLE_ENDIAN
-    t = bswap_32(t);
-#endif
+    t = be_to_host_32(&t);
     return t;
 }
 
 uint64_t kaitai::kstream::read_u8be() {
     uint64_t t;
     m_io->read(reinterpret_cast<char *>(&t), 8);
-#if __BYTE_ORDER == __LITTLE_ENDIAN
-    t = bswap_64(t);
-#endif
+    t = be_to_host_64(&t);
     return t;
 }
 
@@ -225,27 +225,21 @@ uint64_t kaitai::kstream::read_u8be() {
 uint16_t kaitai::kstream::read_u2le() {
     uint16_t t;
     m_io->read(reinterpret_cast<char *>(&t), 2);
-#if __BYTE_ORDER == __BIG_ENDIAN
-    t = bswap_16(t);
-#endif
+    t = le_to_host_16(&t);
     return t;
 }
 
 uint32_t kaitai::kstream::read_u4le() {
     uint32_t t;
     m_io->read(reinterpret_cast<char *>(&t), 4);
-#if __BYTE_ORDER == __BIG_ENDIAN
-    t = bswap_32(t);
-#endif
+    t = le_to_host_32(&t);
     return t;
 }
 
 uint64_t kaitai::kstream::read_u8le() {
     uint64_t t;
     m_io->read(reinterpret_cast<char *>(&t), 8);
-#if __BYTE_ORDER == __BIG_ENDIAN
-    t = bswap_64(t);
-#endif
+    t = le_to_host_64(&t);
     return t;
 }
 
@@ -260,18 +254,14 @@ uint64_t kaitai::kstream::read_u8le() {
 float kaitai::kstream::read_f4be() {
     uint32_t t;
     m_io->read(reinterpret_cast<char *>(&t), 4);
-#if __BYTE_ORDER == __LITTLE_ENDIAN
-    t = bswap_32(t);
-#endif
+    t = be_to_host_32(&t);
     return reinterpret_cast<float &>(t);
 }
 
 double kaitai::kstream::read_f8be() {
     uint64_t t;
     m_io->read(reinterpret_cast<char *>(&t), 8);
-#if __BYTE_ORDER == __LITTLE_ENDIAN
-    t = bswap_64(t);
-#endif
+    t = be_to_host_64(&t);
     return reinterpret_cast<double &>(t);
 }
 
@@ -282,18 +272,14 @@ double kaitai::kstream::read_f8be() {
 float kaitai::kstream::read_f4le() {
     uint32_t t;
     m_io->read(reinterpret_cast<char *>(&t), 4);
-#if __BYTE_ORDER == __BIG_ENDIAN
-    t = bswap_32(t);
-#endif
+    t = le_to_host_32(&t);
     return reinterpret_cast<float &>(t);
 }
 
 double kaitai::kstream::read_f8le() {
     uint64_t t;
     m_io->read(reinterpret_cast<char *>(&t), 8);
-#if __BYTE_ORDER == __BIG_ENDIAN
-    t = bswap_64(t);
-#endif
+    t = le_to_host_64(&t);
     return reinterpret_cast<double &>(t);
 }
 
