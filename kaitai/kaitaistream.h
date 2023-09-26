@@ -168,6 +168,10 @@ public:
     static std::string bytes_strip_right(std::string src, char pad_byte);
     static std::string bytes_terminate(std::string src, char term, bool include);
     static std::string bytes_to_str(const std::string src, const char *src_enc);
+    static std::string bytes_to_str(const std::string src, const std::string &src_enc)
+    {
+      return bytes_to_str(src, src_enc.c_str());
+    }
 
     //@}
 
