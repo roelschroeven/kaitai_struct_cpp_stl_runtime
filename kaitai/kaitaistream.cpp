@@ -6,6 +6,7 @@
 #include <iostream>
 #include <vector>
 #include <stdexcept>
+#include <cstdlib>
 
 // ========================================================================
 // Integer from raw data with correct endianness
@@ -585,7 +586,7 @@ int64_t kaitai::kstream::string_to_int(const std::string& str, int base) {
     char *str_end;
 
     errno = 0;
-    int64_t res = strtoll(str.c_str(), &str_end, base);
+    int64_t res = std::strtoll(str.c_str(), &str_end, base);
 
     // Check for successful conversion and throw an exception if the entire string was not converted
     if (str_end != str.c_str() + str.size()) {
