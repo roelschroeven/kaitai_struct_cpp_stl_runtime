@@ -1,3 +1,5 @@
+#define KS_STR_ENCODING_WIN32API
+
 #include <kaitai/kaitaistream.h>
 #include <kaitai/exceptions.h>
 
