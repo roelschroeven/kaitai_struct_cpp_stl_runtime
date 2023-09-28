@@ -14,6 +14,16 @@
 
 namespace kaitai {
 
+struct memstreambuf: std::streambuf {
+    memstreambuf() {
+    }
+    memstreambuf(const char *base, std::size_t size) {
+        // TODO: It would be very nice to find a way to do this without casting the const away
+        this->setg(const_cast<char*>(base), const_cast<char*>(base), const_cast<char*>(base + size));
+    }
+};
+
+
 /**
  * Kaitai Stream class (kaitai::kstream) is an implementation of
  * <a href="https://doc.kaitai.io/stream_api.html">Kaitai Struct stream API</a>
@@ -45,6 +55,14 @@ public:
      * \param data data buffer to use for this Kaitai Stream
      */
     kstream(const std::string& data);
+
+    /**
+     * Constructs new Kaitai Stream object, wrapping a given memory block (such
+     * as a memory-mapped file).
+     * \param data start of memory block
+     * \param size_t size of memory block
+     */
+    kstream(const char *data, size_t size);
 
     void close();
 
@@ -336,6 +354,8 @@ public:
 private:
     std::istream* m_io;
     std::istringstream m_io_str;
+    memstreambuf m_io_memstreambuf;
+    std::istream m_io_memstream;
     int m_bits_left;
     uint64_t m_bits;
 

@@ -8,3 +8,10 @@ twfiles.@@@
 *.twfd
 *.twopts
 *.stat
+MSVC_32/Release
+MSVC_32/Debug
+MSVC_32/Lib
+MSVC_32/.vs
+*.pdb
+*.vcxproj.filters
+*.vcxproj.user

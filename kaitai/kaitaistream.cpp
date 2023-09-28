@@ -57,15 +57,23 @@ uint64_t be_to_host_64(const void *data)
 //
 // ========================================================================
 
-kaitai::kstream::kstream(std::istream *io) {
+kaitai::kstream::kstream(std::istream *io) : m_io_memstream(&m_io_memstreambuf){
     m_io = io;
     init();
 }
 
-kaitai::kstream::kstream(const std::string &data) : m_io_str(data) {
+kaitai::kstream::kstream(const std::string &data) : m_io_str(data), m_io_memstream(&m_io_memstreambuf) {
     m_io = &m_io_str;
     init();
 }
+
+kaitai::kstream::kstream(const char *data, std::size_t size)
+    : m_io_memstreambuf(data, size)
+    , m_io_memstream(&m_io_memstreambuf)
+{
+    m_io = &m_io_memstream;
+}
+
 
 void kaitai::kstream::init() {
     exceptions_enable();
@@ -377,13 +385,14 @@ uint64_t kaitai::kstream::read_bits_int_le(int n) {
 // ========================================================================
 
 std::string kaitai::kstream::read_bytes(std::streamsize len) {
-    std::vector<char> result(len);
-
     // NOTE: streamsize type is signed, negative values are only *supposed* to not be used.
     // http://en.cppreference.com/w/cpp/io/streamsize
     if (len < 0) {
         throw std::runtime_error("read_bytes: requested a negative amount");
     }
+
+    // At this point we know for sure that len >= 0, so we can safely cast to unsigned
+    std::vector<char> result(static_cast<std::size_t>(len));
 
     if (len > 0) {
         m_io->read(&result[0], len);
@@ -396,7 +405,12 @@ std::string kaitai::kstream::read_bytes_full() {
     std::iostream::pos_type p1 = m_io->tellg();
     m_io->seekg(0, std::ios::end);
     std::iostream::pos_type p2 = m_io->tellg();
-    size_t len = p2 - p1;
+    // Make sure p2 - p1 is always positive
+    if (p2 < p1) {
+        throw std::runtime_error("read_bytes_full: previous position somehow after end of input");
+    }
+    // At this point we know for sure that p2 >= p1, so we can safely cast to unsigned
+    size_t len = static_cast<size_t>(p2 - p1);
 
     // Note: this requires a std::string to be backed with a
     // contiguous buffer. Officially, it's a only requirement since
